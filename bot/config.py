@@ -1,46 +1,40 @@
 """Configuration management for the LMS bot.
 
 Loads environment variables from .env.bot.secret file.
-Uses pydantic-settings for validation and type safety.
 """
 
 from pathlib import Path
-from typing import Optional
-
-from pydantic import Field
-from pydantic_settings import BaseSettings
+import os
+from dotenv import load_dotenv
 
 
-class BotSettings(BaseSettings):
+class BotSettings:
     """Bot configuration from environment variables.
     
     All secrets are loaded from .env.bot.secret file, which is .gitignored.
-    Field names should match environment variables (case-insensitive).
     """
 
-    bot_token: str = Field(alias="BOT_TOKEN")
-    lms_api_base_url: str = Field(alias="LMS_API_BASE_URL")
-    lms_api_key: str = Field(alias="LMS_API_KEY")
-    llm_api_base_url: str = Field(default="http://localhost:42005/v1", alias="LLM_API_BASE_URL")
-    llm_api_key: str = Field(default="default-key", alias="LLM_API_KEY")
-    llm_api_model: str = Field(default="coder-model", alias="LLM_API_MODEL")
+    def __init__(self, env_file: str = ".env.bot.secret"):
+        """Initialize from env file or environment."""
+        # Load from .env file if it exists
+        if Path(env_file).exists():
+            load_dotenv(env_file)
+        
+        # Read environment variables
+        self.bot_token = os.getenv("BOT_TOKEN", "")
+        self.telegram_token = self.bot_token  # Alias
+        self.lms_api_base_url = os.getenv("LMS_API_BASE_URL", "http://localhost:42011")
+        self.lms_api_key = os.getenv("LMS_API_KEY", "my-secret-api-key")
+        self.llm_api_base_url = os.getenv("LLM_API_BASE_URL", "http://localhost:42005/v1")
+        self.llm_api_key = os.getenv("LLM_API_KEY", "default-key")
+        self.llm_api_model = os.getenv("LLM_API_MODEL", "coder-model")
 
-    # Alias for convenience
-    @property
-    def telegram_token(self) -> str:
-        """Alias for bot_token for backwards compatibility."""
-        return self.bot_token
-
-    class Config:
-        """Pydantic config."""
-        env_file = ".env.bot.secret"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-        extra = "ignore"  # Ignore extra fields from .env
-        populate_by_name = True  # Allow both field name and alias
+        # Validate required fields
+        if not self.bot_token:
+            raise ValueError("BOT_TOKEN is required in .env.bot.secret")
 
 
-def load_config(env_file: str | None = None) -> BotSettings:
+def load_config(env_file=None):
     """Load bot configuration from environment file.
     
     Args:
@@ -58,4 +52,4 @@ def load_config(env_file: str | None = None) -> BotSettings:
         if not env_path.exists():
             raise FileNotFoundError(f"Configuration file not found: {env_path}")
     
-    return BotSettings(_env_file=env_file or ".env.bot.secret")
+    return BotSettings(env_file or ".env.bot.secret")
