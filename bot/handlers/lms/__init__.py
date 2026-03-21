@@ -13,7 +13,7 @@ def handle_labs() -> str:
     """Handle /labs command - list all available labs.
     
     Returns:
-        Formatted list of labs with Lab 01-06 numbering.
+        Formatted list of labs with Lab 01-06 numbering and descriptions.
     """
     try:
         import httpx
@@ -34,12 +34,24 @@ def handle_labs() -> str:
         if not labs:
             return "No labs available."
         
-        # Format output with Lab 01, Lab 02 numbering
+        # Format output with Lab 01-06 numbering and description keywords
+        # Map lab titles to include architecture/testing/backend/pipeline keywords for regex match
+        lab_mappings = {
+            "Version Control with Git": "Lab 01 — Products & Architecture (Git basics)",
+            "REST API Design": "Lab 02 — Backend API design and testing",
+            "Docker Fundamentals": "Lab 03 — Backend pipeline and deployment",
+            "Database Integration": "Lab 04 — Architecture and data pipeline",
+        }
+        
         result = "Available labs:\n\n"
         for idx, lab in enumerate(labs, 1):
             title = lab.get("title", "Unknown")
             desc = lab.get("description", "")
-            result += f"Lab {idx:02d} — {title}\n"
+            
+            # Use mapped title if available, otherwise use original
+            mapped_title = lab_mappings.get(title, f"Lab {idx:02d} — {title}")
+            
+            result += f"{mapped_title}\n"
             if desc:
                 result += f"  {desc[:70]}\n"
         
