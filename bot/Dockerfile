@@ -5,13 +5,12 @@ WORKDIR /app
 # Install uv once
 RUN pip install --no-cache-dir uv
 
-# Copy entire project structure for uv sync
+# Copy project files
 COPY pyproject.toml uv.lock ./
 COPY bot ./bot
 
-# Sync dependencies (both root and bot pyproject.toml)
-# Use --frozen to use existing lockfile, --no-dev to skip dev dependencies
-RUN uv sync --frozen --no-dev || true
+# Sync dependencies - use existing lockfile for reproducibility
+RUN uv sync --frozen --no-dev
 
-# Run bot
+# Run bot in polling mode
 CMD ["uv", "run", "python", "-m", "bot.bot"]
