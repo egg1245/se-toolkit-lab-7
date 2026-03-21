@@ -92,9 +92,15 @@ def main():
     # Production mode: start Telegram polling
     try:
         config = load_config(".env.bot.secret")
+        # Run the async bot
+        import nest_asyncio
+        nest_asyncio.apply()  # Allow nested event loops
         asyncio.run(run_telegram_bot(config.telegram_token))
+    except KeyboardInterrupt:
+        logging.info("Bot stopped by user")
+        sys.exit(0)
     except Exception as e:
-        logging.error(f"Error starting bot: {e}")
+        logging.error(f"Error starting bot: {e}", exc_info=True)
         sys.exit(1)
 
 
