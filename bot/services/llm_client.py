@@ -14,6 +14,8 @@ Tool selection is based on tool descriptions - if LLM isn't calling the right to
 improve the descriptions, not the code routing.
 """
 
+import json
+import httpx
 from dataclasses import dataclass
 from typing import Any
 
@@ -36,8 +38,7 @@ class ToolDefinition:
 class LLMClient:
     """LLM client for intent routing and tool calling.
     
-    In production, this would communicate with a real LLM service (OpenAI, Anthropic, etc).
-    For testing and MVP, this is a mock that demonstrates the tool calling interface.
+    Communicates with real LLM service (Qwen via proxy) for tool calling.
     """
 
     def __init__(self, api_base_url: str, api_key: str):
@@ -47,8 +48,73 @@ class LLMClient:
             api_base_url: Base URL of LLM service.
             api_key: API key for authentication.
         """
-        self.api_base_url = api_base_url
+        self.api_base_url = api_base_url.rstrip("/")
         self.api_key = api_key
+
+    def ask(self, user_message: str, tools: list, system_prompt: str, messages: list) -> dict:
+        """Ask LLM with tool definitions and get response.
+        
+        Args:
+            user_message: User's query (for context).
+            tools: List of available tools.
+            system_prompt: System instructions for LLM.
+            messages: Conversation history.
+            
+        Returns:
+            Dict with "message" and optionally "tool_calls".
+        """
+        try:
+            # Prepare request to LLM API
+            url = f"{self.api_base_url}/chat/completions"
+            
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+            }
+            
+            # Format messages with system prompt
+            api_messages = [
+                {"role": "system", "content": system_prompt},
+            ] + messages
+            
+            payload = {
+                "model": "coder-model",
+                "messages": api_messages,
+                "tools": tools,
+                "tool_choice": "auto",
+                "temperature": 0.7,
+            }
+            
+            with httpx.Client() as client:
+                response = client.post(url, json=payload, headers=headers, timeout=30.0)
+                response.raise_for_status()
+                data = response.json()
+            
+            # Parse response
+            choice = data.get("choices", [{}])[0]
+            message = choice.get("message", {})
+            
+            result_message = message.get("content", "")
+            
+            # Check for tool calls
+            tool_calls = []
+            if "tool_calls" in message:
+                for tc in message["tool_calls"]:
+                    tool_calls.append({
+                        "name": tc.get("function", {}).get("name", ""),
+                        "arguments": json.loads(tc.get("function", {}).get("arguments", "{}")),
+                    })
+            
+            return {
+                "message": result_message,
+                "tool_calls": tool_calls,
+            }
+        
+        except Exception as e:
+            return {
+                "message": f"LLM error: {str(e)}",
+                "tool_calls": [],
+            }
 
     def define_tools(self) -> list[ToolDefinition]:
         """Define tools available to LLM.

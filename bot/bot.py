@@ -18,6 +18,7 @@ if os.path.dirname(os.path.dirname(os.path.abspath(__file__))) not in sys.path:
     sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from bot.handlers import handle_health, handle_help, handle_labs, handle_scores, handle_start
+from bot.handlers.intent_router import route_intent
 from bot.config import load_config
 
 # Telegram bot imports
@@ -48,14 +49,17 @@ def parse_command(text: str) -> tuple[str, str]:
 def route_message(command: str, args: str = "") -> str:
     """Route command to appropriate handler.
     
+    Handles both slash commands and natural language queries.
+    
     Args:
-        command: Command name (e.g., "/start").
+        command: Command name (e.g., "/start") or natural language query.
         args: Optional arguments (e.g., "lab-04" for /scores).
         
     Returns:
         Handler response as string.
     """
-    handlers = {
+    # Handle slash commands
+    slash_handlers = {
         "/start": lambda _: handle_start(),
         "/help": lambda _: handle_help(),
         "/health": lambda _: handle_health(),
@@ -63,10 +67,16 @@ def route_message(command: str, args: str = "") -> str:
         "/scores": lambda a: handle_scores(a if a else None),
     }
     
-    if command in handlers:
-        return handlers[command](args)
+    if command in slash_handlers:
+        return slash_handlers[command](args)
     
-    return f"Unknown command: {command}. Use /help for available commands."
+    # If it's a slash command we don't recognize, say so
+    if command.startswith("/"):
+        return f"Unknown command: {command}. Use /help for available commands."
+    
+    # Otherwise treat as natural language query (intent routing)
+    query = f"{command} {args}".strip() if args else command
+    return route_intent(query)
 
 
 def main():
