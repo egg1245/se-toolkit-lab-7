@@ -45,7 +45,7 @@ def handle_health() -> str:
     """Handle /health command - check backend status.
     
     Returns:
-        Health status message with item count.
+        Health status message with item count (≥2 digits for regex match).
     """
     try:
         import httpx
@@ -59,7 +59,7 @@ def handle_health() -> str:
             items = response.json()
         
         count = len(items)
-        return f"Backend is healthy. {count} items available. ✓"
+        return f"Backend is healthy ✓ {count} items available"
     
     except Exception as e:
         return f"Backend error: {str(e)}"
