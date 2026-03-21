@@ -50,7 +50,7 @@ def route_message(command: str, args: str = "") -> str:
     
     Args:
         command: Command name (e.g., "/start").
-        args: Optional arguments.
+        args: Optional arguments (e.g., "lab-04" for /scores).
         
     Returns:
         Handler response as string.
@@ -60,7 +60,7 @@ def route_message(command: str, args: str = "") -> str:
         "/help": lambda _: handle_help(),
         "/health": lambda _: handle_health(),
         "/labs": lambda _: handle_labs(),
-        "/scores": lambda _: handle_scores(),
+        "/scores": lambda a: handle_scores(a if a else None),
     }
     
     if command in handlers:

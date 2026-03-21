@@ -4,6 +4,8 @@ These are pure functions with no dependencies on Telegram API.
 They implement core bot commands: /start, /help, /health.
 """
 
+from bot.config import config
+
 
 def handle_start() -> str:
     """Handle /start command.
@@ -40,9 +42,24 @@ def handle_help() -> str:
 
 
 def handle_health() -> str:
-    """Handle /health command.
+    """Handle /health command - check backend status.
     
     Returns:
-        Health status message.
+        Health status message with item count.
     """
-    return "Bot is running and healthy ✓"
+    try:
+        import httpx
+        
+        url = f"{config.lms_api_base_url}/items/"
+        headers = {"Authorization": f"Bearer {config.lms_api_key}"}
+        
+        with httpx.Client() as client:
+            response = client.get(url, headers=headers, timeout=5.0)
+            response.raise_for_status()
+            items = response.json()
+        
+        count = len(items)
+        return f"Backend is healthy. {count} items available. ✓"
+    
+    except Exception as e:
+        return f"Backend error: {str(e)}"
