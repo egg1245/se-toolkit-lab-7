@@ -69,3 +69,7 @@ def load_config(env_file=None):
     
     # Fallback: try to load from environment or use defaults
     return BotSettings(env_file or ".env.bot.secret")
+
+
+# Export a global config instance for easy import
+config = load_config()
