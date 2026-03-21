@@ -102,18 +102,20 @@ See `PLAN.md` for detailed architecture decisions:
 
 ## Docker
 
+Bot работает в docker-compose, используя Lab-5 backend и LLM сервисы на хосте.
+
 ```bash
-# Build and start all services
-docker compose up -d --build
+# Build and start bot container (uses external Lab-5 backend on 42011)
+docker compose -f docker-compose.bot.yml --env-file ~/.env.docker.secret up -d --build
 
 # Test bot in container
-docker compose exec bot python bot.py --test "/start"
+docker compose -f docker-compose.bot.yml exec bot python -m bot.bot --test "/start"
 
-# Check bot can reach backend (port 8000 is BACKEND_CONTAINER_PORT inside docker-compose)
-docker compose exec bot curl -s http://backend:8000/health
+# Check bot can reach backend (internal port mapping through 172.17.0.1 gateway)
+docker compose -f docker-compose.bot.yml exec bot curl -s http://172.17.0.1:42011/health || echo "health endpoint may not exist"
 
 # View logs
-docker compose logs bot
+docker compose -f docker-compose.bot.yml logs -f bot
 ```
 
 
