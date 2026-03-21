@@ -10,10 +10,9 @@ services:
       - lms-network
     environment:
       - BOT_TOKEN=${BOT_TOKEN:?'BOT_TOKEN is required'}
-      # Use gateway IP (172.17.0.1) to reach host services: Lab-5 backend on 42011, LLM on 42005
-      - LMS_API_BASE_URL=${LMS_API_BASE_URL:-http://172.17.0.1:42011}
+      - LMS_API_BASE_URL=http://172.17.0.1:42011
       - LMS_API_KEY=${LMS_API_KEY:?'LMS_API_KEY is required'}
-      - LLM_API_BASE_URL=${LLM_API_BASE_URL:-http://172.17.0.1:42005/v1}
+      - LLM_API_BASE_URL=http://172.17.0.1:42005/v1
       - LLM_API_KEY=${LLM_API_KEY:?'LLM_API_KEY is required'}
       - LLM_API_MODEL=${LLM_API_MODEL:-coder-model}
     logging:
