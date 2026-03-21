@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-"""Allow running as: python -m bot --test "/command" """
+"""Allow running as: python -m bot --test "/command" from bot/ directory"""
 
 import sys
 import os
 
-# Add parent directory to path so imports work from bot/
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Ensure parent directory is in path for imports from bot/
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
 
 from bot.bot import main
 

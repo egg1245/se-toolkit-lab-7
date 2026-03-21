@@ -10,17 +10,6 @@ dependencies = [
     "pydantic>=2.0.0",
 ]
 
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
-
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["bot*"]
-
-[project.scripts]
-bot = "bot.bot:main"
-
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",
@@ -30,5 +19,4 @@ dev = [
 
 [tool.uv]
 managed = true
-package = true
 
