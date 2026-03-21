@@ -2,14 +2,19 @@
 """Telegram bot entry point with --test mode for debugging.
 
 Usage:
-  python bot.py --test "/start"
-  python bot.py --test "/help"
+  cd bot && uv run bot.py --test "/start"
+  cd bot && uv run bot.py --test "/help"
   
 Production usage: Telegram polling would be implemented here (not included in MVP).
 """
 
 import argparse
 import sys
+import os
+
+# Ensure bot package is importable when running from bot/ directory
+if os.path.dirname(os.path.dirname(os.path.abspath(__file__))) not in sys.path:
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from bot.handlers import handle_health, handle_help, handle_labs, handle_scores, handle_start
 

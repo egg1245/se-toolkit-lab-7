@@ -19,4 +19,9 @@ dev = [
 
 [tool.uv]
 managed = true
+package = false
+
+[tool.uv.sources]
+# Run bot.py from bot/ directory by setting PYTHONPATH
+
 
