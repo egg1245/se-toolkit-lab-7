@@ -5,7 +5,9 @@ Uses pydantic-settings for validation and type safety.
 """
 
 from pathlib import Path
+from typing import Optional
 
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -16,12 +18,12 @@ class BotSettings(BaseSettings):
     Field names should match environment variables (case-insensitive).
     """
 
-    bot_token: str  # BOT_TOKEN from .env
-    lms_api_base_url: str
-    lms_api_key: str
-    llm_api_base_url: str = "http://localhost:42005/v1"
-    llm_api_key: str = "default-key"
-    llm_api_model: str = "coder-model"
+    bot_token: str = Field(alias="BOT_TOKEN")
+    lms_api_base_url: str = Field(alias="LMS_API_BASE_URL")
+    lms_api_key: str = Field(alias="LMS_API_KEY")
+    llm_api_base_url: str = Field(default="http://localhost:42005/v1", alias="LLM_API_BASE_URL")
+    llm_api_key: str = Field(default="default-key", alias="LLM_API_KEY")
+    llm_api_model: str = Field(default="coder-model", alias="LLM_API_MODEL")
 
     # Alias for convenience
     @property
@@ -35,6 +37,7 @@ class BotSettings(BaseSettings):
         env_file_encoding = "utf-8"
         case_sensitive = False
         extra = "ignore"  # Ignore extra fields from .env
+        populate_by_name = True  # Allow both field name and alias
 
 
 def load_config(env_file: str | None = None) -> BotSettings:
