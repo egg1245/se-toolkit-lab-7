@@ -48,10 +48,16 @@ class LMSClient:
         try:
             with httpx.Client() as client:
                 url = f"{self.base_url}/items/"
+                import sys
+                print(f"[LMS] GET {url}", file=sys.stderr)
                 response = client.get(url, headers=self._headers(), timeout=self.timeout)
                 response.raise_for_status()
-                return response.json()
-        except Exception:
+                result = response.json()
+                print(f"[LMS] GET {url} -> {len(result) if isinstance(result, list) else 'ok'}", file=sys.stderr)
+                return result
+        except Exception as e:
+            import sys
+            print(f"[LMS] GET {url} -> ERROR: {e}", file=sys.stderr)
             return []
     
     def get_learners(self) -> list[dict[str, Any]]:
