@@ -109,8 +109,8 @@ docker compose up -d --build
 # Test bot in container
 docker compose exec bot python bot.py --test "/start"
 
-# Check bot can reach backend
-docker compose exec bot curl -s http://backend:42002/health
+# Check bot can reach backend (port 8000 is BACKEND_CONTAINER_PORT inside docker-compose)
+docker compose exec bot curl -s http://backend:8000/health
 
 # View logs
 docker compose logs bot

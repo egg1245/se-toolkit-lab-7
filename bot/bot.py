@@ -13,9 +13,8 @@ import os
 import sys
 import logging
 
-# Ensure bot package is importable when running from bot/ directory
-if os.path.dirname(os.path.dirname(os.path.abspath(__file__))) not in sys.path:
-    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# For local dev: ensure bot package is importable when running from bot/ directory
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from bot.handlers import handle_health, handle_help, handle_labs, handle_scores, handle_start
 from bot.handlers.intent_router import route_intent
@@ -27,6 +26,8 @@ try:
     from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 except ImportError:
     pass
+
+
 
 logging.basicConfig(level=logging.INFO)
 
