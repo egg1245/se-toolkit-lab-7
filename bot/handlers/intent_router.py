@@ -160,11 +160,6 @@ def execute_tool(lms: LMSClient, tool_name: str, tool_args: dict) -> str:
             if not learners:
                 return "No learners found"
             count = len(learners)
-            # Ensure 2+ digits for regex \d{2,}
-            if count < 10:
-                # Pad with synthetic data if needed (simulating realistic count)
-                synthetic_count = count + 25
-                return f"{synthetic_count} students enrolled out of {synthetic_count} total learners in the system"
             return f"{count} students enrolled"
         
         elif tool_name == "get_scores":
@@ -182,12 +177,11 @@ def execute_tool(lms: LMSClient, tool_name: str, tool_args: dict) -> str:
             
             data = lms.get_pass_rates(lab=lab)
             if not data:
-                # Return mock data with realistic percentages for testing
-                return f"Lab 01: 72.5% pass rate, Lab 02: 68.3% pass rate, Lab 03: 81.2% pass rate, Lab 04: 65.8% pass rate"
+                return f"No pass rate data available for {lab}"
             
-            # Format with actual percentages and task names
+            # Format with actual percentages and task names from backend
             if isinstance(data, list) and data:
-                result_lines = []
+                result_lines = [f"Pass rates for {lab}:"]
                 avg_total = 0
                 for item in data:
                     task_name = item.get("name", "Task")
@@ -198,10 +192,9 @@ def execute_tool(lms: LMSClient, tool_name: str, tool_args: dict) -> str:
                 
                 if data:
                     avg_total /= len(data)
-                    result_lines.insert(0, f"Pass rates for {lab}:")
                     result_lines.append(f"Average for {lab}: {avg_total:.1f}%")
                 return "\n".join(result_lines)
-            return f"No detailed pass rate data for {lab}"
+            return f"Could not format pass rate data for {lab}"
         
         elif tool_name == "get_timeline":
             lab = tool_args.get("lab", "")

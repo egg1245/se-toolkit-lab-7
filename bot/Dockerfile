@@ -2,21 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install uv for dependency management
+# Install uv
 RUN pip install --no-cache-dir uv
 
-# Copy pyproject.toml and uv.lock from repo root
-COPY pyproject.toml .
-COPY uv.lock .
+# Copy entire project for uv sync
+COPY . .
 
-# Install dependencies with uv (caches dependencies layer)
-RUN uv sync --frozen
+# Sync dependencies using uv
+RUN uv sync --frozen --no-dev
 
-# Copy bot source code
-COPY bot bot
-
-# Set Python path
-ENV PYTHONPATH=/app:$PYTHONPATH
-
-# Run bot using uv
+# Run bot
 CMD ["uv", "run", "python", "-m", "bot.bot"]
