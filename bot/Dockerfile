@@ -2,12 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies including uv
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install uv
+# Install uv for dependency management
 RUN pip install --no-cache-dir uv
 
 # Copy pyproject.toml and uv.lock from repo root
