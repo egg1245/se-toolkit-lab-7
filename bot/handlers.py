@@ -1,14 +1,15 @@
-"""DEPRECATED: This file is kept for compatibility. Use bot.handlers.commands instead.
+"""DEPRECATED: This file is kept for backward compatibility.
 
 This module is deprecated. All command handlers have moved to:
-  bot.handlers.commands
+  bot.handlers.basic - Core commands
+  bot.handlers.lms - LMS integration commands
 
-Import from there:
+Import from bot.handlers instead:
   from bot.handlers import handle_start, handle_help, etc.
 """
 
-# Backward compatibility re-exports (if needed)
-from bot.handlers.commands import (
+# Backward compatibility re-exports
+from bot.handlers import (
     handle_health,
     handle_help,
     handle_labs,
@@ -23,4 +24,3 @@ __all__ = [
     "handle_labs",
     "handle_scores",
 ]
-
