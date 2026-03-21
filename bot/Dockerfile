@@ -2,19 +2,26 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including uv
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY pyproject.toml .
+# Install uv
+RUN pip install --no-cache-dir uv
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -e .
+# Copy pyproject.toml and uv.lock for dependency caching
+COPY pyproject.toml .
+COPY uv.lock .
+
+# Install dependencies with uv
+RUN uv sync --frozen
 
 # Copy source code
 COPY . .
 
-# Run bot (note: would need proper entry point for production)
-CMD ["python", "bot.py"]
+# Set Python path
+ENV PYTHONPATH=/app:$PYTHONPATH
+
+# Run bot - use full module path
+CMD ["uv", "run", "python", "-m", "bot.bot"]

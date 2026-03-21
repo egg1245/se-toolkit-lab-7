@@ -95,3 +95,41 @@ By the end of this lab, you should be able to say:
 ### Optional
 
 1. [Flutter Web Chatbot](./lab/tasks/optional/task-1.md)
+
+## Deployment
+
+### Prerequisites
+
+- Docker and Docker Compose installed on VM
+- `.env.docker.secret` file with required environment variables
+- Backend running and healthy
+
+### Required environment variables in `.env.docker.secret`
+
+```bash
+BOT_TOKEN=your_telegram_bot_token
+LMS_API_BASE_URL=http://backend:8000
+LMS_API_KEY=your_lms_api_key
+LLM_API_BASE_URL=http://host.docker.internal:42005/v1
+LLM_API_KEY=your_llm_api_key
+LLM_API_MODEL=coder-model
+```
+
+### Deploy to Docker
+
+```bash
+cd ~/se-toolkit-lab-7
+pkill -f "bot.py" 2>/dev/null || true
+docker compose --env-file .env.docker.secret up --build -d
+docker compose --env-file .env.docker.secret ps
+```
+
+### Verify
+
+In Telegram: `/start`, `/health`, `/labs`, or ask "what labs are available?"
+
+### Common issues
+
+- Bot won't start: Check `docker compose logs bot`
+- Backend connection fails: Verify `LMS_API_BASE_URL=http://backend:8000` (not localhost)
+- LLM queries fail: Use `http://host.docker.internal:42005/v1` for Qwen proxy
