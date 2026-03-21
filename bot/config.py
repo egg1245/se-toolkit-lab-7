@@ -72,4 +72,15 @@ def load_config(env_file=None):
 
 
 # Export a global config instance for easy import
-config = load_config()
+# Only load if env file exists, otherwise lazy load
+_config = None
+
+def get_config():
+    """Lazy load config on first access."""
+    global _config
+    if _config is None:
+        _config = load_config()
+    return _config
+
+# For backwards compatibility - access via get_config()
+config = None  # Will be set on first use

@@ -19,7 +19,7 @@ if os.path.dirname(os.path.dirname(os.path.abspath(__file__))) not in sys.path:
 
 from bot.handlers import handle_health, handle_help, handle_labs, handle_scores, handle_start
 from bot.handlers.intent_router import route_intent
-from bot.config import load_config
+from bot.config import load_config, get_config
 
 # Telegram bot imports
 try:
@@ -102,7 +102,7 @@ def main():
     try:
         config = load_config(".env.bot.secret")
         # Build and run bot
-        app = Application.builder().token(config.telegram_token).build()
+        app = Application.builder().token(config.bot_token).build()
         
         # Add command handlers
         app.add_handler(CommandHandler("start", telegram_start))
