@@ -37,19 +37,24 @@ class BotSettings:
 def load_config(env_file=None):
     """Load bot configuration from environment file.
     
+    Searches in: current dir, parent dir, and /root/se-toolkit-lab-7
+    
     Args:
         env_file: Optional path to .env file. Defaults to .env.bot.secret.
         
     Returns:
         BotSettings instance with validated configuration.
-        
-    Raises:
-        FileNotFoundError: If env_file doesn't exist.
-        ValueError: If required settings are missing or invalid.
     """
-    if env_file:
-        env_path = Path(env_file)
-        if not env_path.exists():
-            raise FileNotFoundError(f"Configuration file not found: {env_path}")
+    # Try multiple locations
+    search_paths = [
+        Path(env_file or ".env.bot.secret"),
+        Path("..") / (env_file or ".env.bot.secret"),
+        Path("/root/se-toolkit-lab-7") / (env_file or ".env.bot.secret"),
+    ]
     
+    for env_path in search_paths:
+        if env_path.exists():
+            return BotSettings(str(env_path))
+    
+    # Fallback: try to load from environment or use defaults
     return BotSettings(env_file or ".env.bot.secret")
