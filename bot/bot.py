@@ -9,7 +9,6 @@ Or production: uv run python -m bot.bot (Telegram polling mode)
 """
 
 import argparse
-import asyncio
 import os
 import sys
 import logging
@@ -92,8 +91,19 @@ def main():
     # Production mode: start Telegram polling
     try:
         config = load_config(".env.bot.secret")
-        # Run the async bot directly
-        asyncio.run(run_telegram_bot(config.telegram_token))
+        # Build and run bot
+        app = Application.builder().token(config.telegram_token).build()
+        
+        # Add command handlers
+        app.add_handler(CommandHandler("start", telegram_start))
+        app.add_handler(CommandHandler("help", telegram_help))
+        app.add_handler(CommandHandler("health", telegram_health))
+        app.add_handler(CommandHandler("labs", telegram_labs))
+        app.add_handler(CommandHandler("scores", telegram_scores))
+        
+        # Start polling (blocking call)
+        logging.info("Bot started polling...")
+        app.run_polling()
     except KeyboardInterrupt:
         logging.info("Bot stopped by user")
         sys.exit(0)
@@ -103,19 +113,8 @@ def main():
 
 
 async def run_telegram_bot(token: str):
-    """Run the Telegram bot with polling."""
-    app = Application.builder().token(token).build()
-    
-    # Add command handlers
-    app.add_handler(CommandHandler("start", telegram_start))
-    app.add_handler(CommandHandler("help", telegram_help))
-    app.add_handler(CommandHandler("health", telegram_health))
-    app.add_handler(CommandHandler("labs", telegram_labs))
-    app.add_handler(CommandHandler("scores", telegram_scores))
-    
-    # Start polling
-    logging.info("Bot started polling...")
-    await app.run_polling()
+    """Helper - not used in this version."""
+    pass
 
 
 async def telegram_start(update: "Update", context: "ContextTypes.DEFAULT_TYPE") -> None:
