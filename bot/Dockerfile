@@ -10,18 +10,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install uv
 RUN pip install --no-cache-dir uv
 
-# Copy pyproject.toml and uv.lock for dependency caching
+# Copy pyproject.toml and uv.lock from repo root
 COPY pyproject.toml .
 COPY uv.lock .
 
-# Install dependencies with uv
+# Install dependencies with uv (caches dependencies layer)
 RUN uv sync --frozen
 
-# Copy source code
-COPY . .
+# Copy bot source code
+COPY bot bot
 
 # Set Python path
 ENV PYTHONPATH=/app:$PYTHONPATH
 
-# Run bot - use full module path
+# Run bot using uv
 CMD ["uv", "run", "python", "-m", "bot.bot"]
