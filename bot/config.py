@@ -22,7 +22,7 @@ class BotSettings:
         # Read environment variables
         self.bot_token = os.getenv("BOT_TOKEN", "")
         self.telegram_token = self.bot_token  # Alias
-        self.lms_api_base_url = os.getenv("LMS_API_BASE_URL", "http://localhost:42011")
+        self.lms_api_base_url = os.getenv("LMS_API_BASE_URL", "http://localhost:42002")
         self.lms_api_key = os.getenv("LMS_API_KEY", "my-secret-api-key")
         self.llm_api_base_url = os.getenv("LLM_API_BASE_URL", "http://localhost:42005/v1")
         self.llm_api_key = os.getenv("LLM_API_KEY", "default-key")
