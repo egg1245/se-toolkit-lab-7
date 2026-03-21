@@ -1,9 +1,11 @@
-"""Tests for bot command handlers (task-1).
+"""Tests for bot command handlers (task-1 & task-2).
 
 Handlers are pure functions, easily testable without external dependencies.
+Uses mocking to simulate backend API responses.
 """
 
 import pytest
+from unittest.mock import patch, MagicMock
 
 from bot.handlers import (
     handle_health,
@@ -31,21 +33,65 @@ class TestHandlers:
         assert "/help" in result
         assert "/health" in result or "health" in result.lower()
 
-    def test_handle_health(self):
-        """Test /health returns status."""
+    @patch('httpx.Client')
+    def test_handle_health(self, mock_client_class):
+        """Test /health returns backend status with item count."""
+        # Mock httpx.Client response
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = [
+            {"id": 1, "title": "Lab 01", "type": "lab"},
+            {"id": 2, "title": "Lab 02", "type": "lab"},
+            {"id": 3, "title": "Task 1", "type": "task"},
+        ]
+        mock_client.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client
+        
         result = handle_health()
         assert isinstance(result, str)
-        assert "healthy" in result.lower() or "running" in result.lower()
+        assert "healthy" in result.lower()
+        assert "3" in result  # Should show item count
 
-    def test_handle_labs(self):
-        """Test /labs returns message (placeholder in task-1)."""
+    @patch('httpx.Client')
+    def test_handle_labs(self, mock_client_class):
+        """Test /labs lists available labs."""
+        # Mock httpx.Client response
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = [
+            {"id": 1, "title": "Lab 01 - Git", "type": "lab", "description": "Version control"},
+            {"id": 2, "title": "Lab 02 - REST", "type": "lab", "description": "API design"},
+            {"id": 3, "title": "Task 1", "type": "task", "description": "Some task"},
+        ]
+        mock_client.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client
+        
         result = handle_labs()
         assert isinstance(result, str)
-        assert len(result) > 0
+        assert "Lab 01" in result or "Lab" in result
+        assert len(result) > 10  # Should have meaningful content
 
-    def test_handle_scores(self):
-        """Test /scores returns message (placeholder in task-1)."""
-        result = handle_scores()
+    @patch('httpx.Client')
+    def test_handle_scores(self, mock_client_class):
+        """Test /scores shows pass rates for a lab."""
+        # Mock httpx.Client response
+        mock_client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = [
+            {"title": "Task 1.1", "avg_score": 85.5, "attempts": 12},
+            {"title": "Task 1.2", "avg_score": 92.3, "attempts": 10},
+        ]
+        mock_client.get.return_value = mock_response
+        mock_client_class.return_value.__enter__.return_value = mock_client
+        
+        result = handle_scores("lab-01")
         assert isinstance(result, str)
-        assert len(result) > 0
+        assert "%" in result  # Should show percentages
+        assert "attempt" in result.lower()  # Should show attempt counts
+        assert "Lab-01" in result or "lab-01" in result.lower()
 
+    def test_handle_scores_no_lab(self):
+        """Test /scores without lab argument shows usage."""
+        result = handle_scores(None)
+        assert isinstance(result, str)
+        assert "usage" in result.lower() or "example" in result.lower()
