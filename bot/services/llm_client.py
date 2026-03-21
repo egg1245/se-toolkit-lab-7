@@ -90,20 +90,34 @@ class LLMClient:
                 response.raise_for_status()
                 data = response.json()
             
+            # Debug: print raw response
+            import sys
+            print(f"[llm] Raw response: {json.dumps(data)[:500]}", file=sys.stderr)
+            
             # Parse response
             choice = data.get("choices", [{}])[0]
             message = choice.get("message", {})
             
             result_message = message.get("content", "")
             
-            # Check for tool calls
+            # Check for tool calls - handle both formats
             tool_calls = []
             if "tool_calls" in message:
                 for tc in message["tool_calls"]:
-                    tool_calls.append({
-                        "name": tc.get("function", {}).get("name", ""),
-                        "arguments": json.loads(tc.get("function", {}).get("arguments", "{}")),
-                    })
+                    # Standard format: {"type": "function", "function": {"name": "...", "arguments": "..."}}
+                    if "function" in tc:
+                        tool_calls.append({
+                            "name": tc["function"].get("name", ""),
+                            "arguments": json.loads(tc["function"].get("arguments", "{}")),
+                        })
+                    # Alternative format: direct name and args
+                    elif "name" in tc:
+                        tool_calls.append({
+                            "name": tc.get("name", ""),
+                            "arguments": json.loads(tc.get("arguments", "{}")),
+                        })
+            
+            print(f"[llm] Parsed tool_calls: {tool_calls}", file=sys.stderr)
             
             return {
                 "message": result_message,
@@ -111,6 +125,8 @@ class LLMClient:
             }
         
         except Exception as e:
+            import sys
+            print(f"[llm] Error: {str(e)}", file=sys.stderr)
             return {
                 "message": f"LLM error: {str(e)}",
                 "tool_calls": [],
