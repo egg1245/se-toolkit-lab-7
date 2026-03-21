@@ -7,8 +7,16 @@ set -e  # Exit on first error
 echo "=== LMS Bot Setup & Verification ==="
 echo ""
 
-PROJECT_ROOT="/Users/easyg/Documents/Innopolis/SET/Lab7"
-cd "$PROJECT_ROOT"
+# Determine project root - use script location or current directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="${SCRIPT_DIR}"
+
+# If running on VM, adjust path
+if [ ! -d "$PROJECT_ROOT/bot" ]; then
+    PROJECT_ROOT="$HOME/se-toolkit-lab-7"
+fi
+
+cd "$PROJECT_ROOT" || { echo "Error: Could not find project root"; exit 1; }
 
 echo "Step 1: Install bot dependencies using uv"
 cd "$PROJECT_ROOT/bot"
