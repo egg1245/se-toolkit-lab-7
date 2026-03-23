@@ -1,5 +1,5 @@
 # Build stage: prepare dependencies with uv
-FROM ghcr.io/astral-sh/uv:latest AS builder
+FROM ghcr.io/astral-sh/uv:0.4.6-python3.11-slim AS builder
 
 WORKDIR /app
 
