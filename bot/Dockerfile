@@ -1,10 +1,15 @@
 ARG REGISTRY_PREFIX=harbor.pg.innopolis.university/docker-hub-cache/
+
+# Stage 1: Get uv from official image
+FROM ${REGISTRY_PREFIX}ghcr.io/astral-sh/uv:latest as uv-builder
+
+# Stage 2: Build app
 FROM ${REGISTRY_PREFIX}python:3.11-slim
 
 WORKDIR /app
 
-# Install uv once
-RUN pip install --no-cache-dir uv
+# Copy uv binary from builder stage
+COPY --from=uv-builder /usr/local/bin/uv /usr/local/bin/uv
 
 # Copy project files
 COPY pyproject.toml uv.lock ./
