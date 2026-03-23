@@ -1,13 +1,10 @@
 ARG REGISTRY_PREFIX=harbor.pg.innopolis.university/docker-hub-cache/
-
-# Build stage: prepare dependencies with uv
-FROM ${REGISTRY_PREFIX}python:3.11-slim AS builder
+FROM ${REGISTRY_PREFIX}python:3.11-slim
 
 WORKDIR /app
 
-# Copy pre-built uv binary
-COPY uv /usr/local/bin/uv
-RUN chmod +x /usr/local/bin/uv
+# Install uv (via pip if not already available in base image)
+RUN python -m pip install --no-cache-dir uv || true
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
@@ -18,18 +15,7 @@ COPY bot ./bot
 # Sync dependencies into .venv
 RUN uv sync --frozen --no-dev
 
-# Runtime stage: minimal image with .venv
-FROM ${REGISTRY_PREFIX}python:3.11-slim
-
-WORKDIR /app
-
-# Copy .venv from builder
-COPY --from=builder /app/.venv /app/.venv
-
-# Copy bot package
-COPY bot ./bot
-
-# Use .venv from builder
+# Use .venv
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Run bot in polling mode
