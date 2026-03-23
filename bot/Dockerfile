@@ -5,8 +5,9 @@ FROM ${REGISTRY_PREFIX}python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Install uv via pip (only in builder, not in runtime)
-RUN python -m pip install --no-cache-dir uv
+# Copy pre-built uv binary
+COPY uv /usr/local/bin/uv
+RUN chmod +x /usr/local/bin/uv
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
