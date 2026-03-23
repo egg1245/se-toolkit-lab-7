@@ -1,7 +1,12 @@
+ARG REGISTRY_PREFIX=harbor.pg.innopolis.university/docker-hub-cache/
+
 # Build stage: prepare dependencies with uv
-FROM ghcr.io/astral-sh/uv:0.4.6-python3.11-slim AS builder
+FROM ${REGISTRY_PREFIX}python:3.11-slim AS builder
 
 WORKDIR /app
+
+# Install uv via pip (only in builder, not in runtime)
+RUN python -m pip install --no-cache-dir uv
 
 # Copy dependency files
 COPY pyproject.toml uv.lock ./
@@ -13,7 +18,6 @@ COPY bot ./bot
 RUN uv sync --frozen --no-dev
 
 # Runtime stage: minimal image with .venv
-ARG REGISTRY_PREFIX=harbor.pg.innopolis.university/docker-hub-cache/
 FROM ${REGISTRY_PREFIX}python:3.11-slim
 
 WORKDIR /app
