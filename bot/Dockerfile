@@ -1,19 +1,31 @@
-ARG REGISTRY_PREFIX=harbor.pg.innopolis.university/docker-hub-cache/
-FROM ${REGISTRY_PREFIX}python:3.11-slim
+# Build stage: prepare dependencies with uv
+FROM ghcr.io/astral-sh/uv:latest AS builder
 
 WORKDIR /app
 
-# Install uv
-RUN pip install uv
-
-# Copy dependency lock file and project definition
+# Copy dependency files
 COPY pyproject.toml uv.lock ./
 
 # Copy bot package
 COPY bot ./bot
 
-# Sync dependencies - uses lock file for reproducibility
+# Sync dependencies into .venv
 RUN uv sync --frozen --no-dev
 
+# Runtime stage: minimal image with .venv
+ARG REGISTRY_PREFIX=harbor.pg.innopolis.university/docker-hub-cache/
+FROM ${REGISTRY_PREFIX}python:3.11-slim
+
+WORKDIR /app
+
+# Copy .venv from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy bot package
+COPY bot ./bot
+
+# Use .venv from builder
+ENV PATH="/app/.venv/bin:$PATH"
+
 # Run bot in polling mode
-CMD ["uv", "run", "python", "-m", "bot.bot"]
+CMD ["python", "-m", "bot.bot"]
