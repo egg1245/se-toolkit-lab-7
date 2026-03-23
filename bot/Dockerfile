@@ -1,4 +1,5 @@
-FROM python:3.11-slim
+ARG REGISTRY_PREFIX=harbor.pg.innopolis.university/docker-hub-cache/
+FROM ${REGISTRY_PREFIX}python:3.11-slim
 
 WORKDIR /app
 
