@@ -1,9 +1,9 @@
 ARG REGISTRY_PREFIX=harbor.pg.innopolis.university/docker-hub-cache/
 
-# Stage 1: Get uv from official image
-FROM ${REGISTRY_PREFIX}ghcr.io/astral-sh/uv:latest as uv-builder
+# Stage 1: Get uv from official image (don't use registry prefix for ghcr.io)
+FROM ghcr.io/astral-sh/uv:latest AS uv-builder
 
-# Stage 2: Build app
+# Stage 2: Build app with python base image
 FROM ${REGISTRY_PREFIX}python:3.11-slim
 
 WORKDIR /app
