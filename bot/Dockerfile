@@ -7,7 +7,12 @@ WORKDIR /app
 COPY bot ./bot
 
 # Install bot dependencies
-RUN python -m pip install --no-cache-dir -e ./bot
+RUN pip install --no-cache-dir \
+    python-telegram-bot>=20.0 \
+    httpx>=0.25.0 \
+    pydantic-settings>=2.0.0 \
+    pydantic>=2.0.0 \
+    python-dotenv>=1.0.0
 
 # Run bot in polling mode
 CMD ["python", "-m", "bot.bot"]
