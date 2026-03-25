@@ -14,12 +14,12 @@ services:
       - 8.8.8.8
       - 8.8.4.4
     environment:
-      - BOT_TOKEN=${BOT_TOKEN:?'BOT_TOKEN is required'}
+      - BOT_TOKEN=${BOT_TOKEN}
       - LMS_API_BASE_URL=http://172.17.0.1:42011
-      - LMS_API_KEY=${LMS_API_KEY:?'LMS_API_KEY is required'}
+      - LMS_API_KEY=${LMS_API_KEY}
       - LLM_API_BASE_URL=http://172.17.0.1:42005/v1
-      - LLM_API_KEY=${LLM_API_KEY:?'LLM_API_KEY is required'}
-      - LLM_API_MODEL=${LLM_API_MODEL:-coder-model}
+      - LLM_API_KEY=${LLM_API_KEY}
+      - LLM_API_MODEL=${LLM_API_MODEL}
     logging:
       driver: "json-file"
       options:
